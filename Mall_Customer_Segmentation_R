@@ -1,0 +1,76 @@
+#Customer Segmentation using kmeans Clustering 
+#Mall_Customer_Dataset
+library(tidyverse)
+df <- read.csv("Mall_Customers_Dataset.csv")
+
+#inspection dataframe
+names(df)
+unique(df$Genre)
+summary(df)
+head(df, n=10)
+
+#delete CustomerID column
+df <- subset(df, select = -CustomerID)
+
+#NA? -no
+library(VIM)
+aggr(df)
+
+#converting gender into numbers 
+df$Genre <- as.character(df$Genre)
+df$Genre[df$Genre=="Male"]<-1
+df$Genre[df$Genre=="Female"]<-0
+df$Genre <- as.numeric(df$Genre)
+
+#Scale Data
+df <- scale(df)
+
+#######
+#Clustering
+
+#Ellbow Method 
+library(factoextra)
+fviz_nbclust(df, kmeans, method="wss")
+
+#comparison: Gap statistics
+library(cluster)
+gap_stat <- clusGap(df,
+                    FUN = kmeans,
+                    nstart = 25,
+                    K.max = 10,
+                    B = 50)
+fviz_gap_stat(gap_stat)
+
+#-> 5 Clusters!
+
+#make it reproducible
+set.seed(100)
+
+#kmeans Clustering
+km <- kmeans(df, centers=5, nstart=100)
+km$centers # Mean of clusters
+km$size #number of observations per cluster
+
+#show clusteraffiliation in new column 
+df <- cbind(df, km$cluster)
+
+#Clusterplot
+fviz_cluster(km, data = df)
+
+#Scatterplot
+colour <- c("red","yellow","green","blue","purple")
+ggplot(df, aes(x = df[,3], y = df[,4], color = colour[km$cluster])) +
+  geom_point(size = 2) + 
+  labs(x = "Annual Income 1 -100", y = "Spending Score 1-100", 
+       title = "K-means-Clustering mit 5 Clustern") 
+
+########
+#Interpretation: Cluster Red and -purple are important Customer segments for 
+#the mall with a high spending score, ensuring that they remain loyal and satisfied. Cluster blue and Cluster yellow 
+#have a low spending score, so they are probably not satisfied with the mall. 
+#Try to start satisfying these groups through new Services so that they spend more.
+
+
+
+
+

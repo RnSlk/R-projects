@@ -62,7 +62,7 @@ fviz_cluster(km, data = df)
 colour <- c("red","yellow","green","blue","purple")
 ggplot(df, aes(x = df[,3], y = df[,4], color = colour[km$cluster])) +
   geom_point(size = 2) + 
-  labs(x = "Annual Income 1 -100", y = "Spending Score 1-100", 
+  labs(x = "Annual Income in k", y = "Spending Score 1-100", 
        title = "K-means-Clustering mit 5 Clustern") 
 
 ########

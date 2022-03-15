@@ -1,5 +1,6 @@
 #Customer Segmentation using kmeans Clustering 
-#Mall_Customer_Dataset
+
+#Mall_Customer_Dataset https://www.kaggle.com/mltuts/mall-customer-datasets
 library(tidyverse)
 df <- read.csv("Mall_Customers_Dataset.csv")
 

@@ -1,6 +1,6 @@
 #text analysis
 
-###############
+################
 # 1. business question understanding:
 #what word combinations are most often used
 #what is the overall sentiment 
@@ -151,6 +151,21 @@ feedback_facet_plot <- tokens %>%
   coord_flip()
 #the people who gave no feedback (=0), used completly different words than those who gave
   
+
+
+###########
+#N-Grams 
+###########
+
+ngrams4_plot <- df %>%
+  unnest_tokens(word, text, token="ngrams", n=4) %>%
+  count(word) %>%
+  top_n(15, n) %>%
+  na.omit() %>%
+  mutate(word2=fct_reorder(word, n)) %>%
+  ggplot(aes(word2, n, fill=word))+
+  geom_col() +
+  coord_flip()
     
 ######################
 #wordcloud for stemmed words
@@ -170,29 +185,72 @@ wordcloud(
 #########################
 #bing, nrc, afinn
 #lexicon exploration to get understanding 
-install.packages("textdata")
 library(textdata)
 sentiment_nrc <-  get_sentiments("nrc") %>%
   count(sentiment) %>%
   mutate(sentiment2 = fct_reorder(sentiment, n)) %>%
   arrange(desc(n))
-
 #visualization
-facet_sentiment <- tokens %>%
+facet_sentiment_plot <- tokens %>%
   inner_join(get_sentiments("bing")) %>%
   count(word, sentiment) %>%
   group_by(sentiment) %>%
   top_n(10, n) %>%
   ungroup() %>%
-  mutate(sentiment2 = fct_reorder(word, n))
-  
-facet_sentimentgg <- ggplot(facet_sentiment, aes(x=word, y=n, fill=sentiment)) +
+  mutate(sentiment2 = fct_reorder(word, n)) %>%
+  ggplot(aes(x=word, y=n, fill=sentiment)) +
   geom_col() +
   facet_wrap(~ sentiment, scale="free") +
   coord_flip() 
 
 # sentiment by rating 
-rating_tokens %>%
+rating_sentiment_plot <- tokens %>%
   inner_join(get_sentiments("nrc")) %>%
   count(rating, sentiment) %>%
-  spread(sentiment, n)
+  ggplot(aes(x=sentiment, y=n )) +
+  geom_col() +
+  facet_wrap(~rating, scale="free") +
+  coord_flip() +
+  labs(title = "Attention: different scales on y achsis!")
+
+# sentiment by feedback
+feedback_sentiment_plot <- tokens %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(feedback, sentiment) %>%
+  ggplot(aes(x=sentiment, y=n, fill="blue" )) +
+  geom_col() +
+  facet_wrap(~feedback, scale="free") +
+  coord_flip() +
+  labs(title = "Attention: different scales on y achsis!")
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

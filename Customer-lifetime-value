@@ -219,7 +219,7 @@ df <- df %>%
   subset(select=-Vehicle.Size)
   
 #rename Customer.Lifetime.Value Column 
-df <- rename(df, CLV = Customer.Lifetime.Value)
+df <- rename(df, target = Customer.Lifetime.Value)
 
 ########################
 #FEATURE SELECTION (CORRELATIONS)
@@ -244,17 +244,17 @@ df <- subset(df, select=-Total.Claim.Amount)
 #Cross validiation
 library(caret)
 set.seed(100)
-intrain <- createDataPartition(df$CLV, p=0.7, list=FALSE )
+intrain <- createDataPartition(df$target, p=0.7, list=FALSE )
 training <- df[intrain,]
 testing <- df[-intrain,]
 dim(training); dim(testing) #proof
 
 #Feature Selection using Backward elimination 
-full.model <- lm(CLV~ ., data=na.omit(training))
+full.model <- lm(target~ ., data=na.omit(training))
 step(full.model, direction = "backward", trace=FALSE)
 
 #now using this to build our model 
-lm.clv <- lm(CLV ~ Income + Monthly.Premium.Auto + Number.of.Open.Complaints + 
+lm.clv <- lm(target ~ Income + Monthly.Premium.Auto + Number.of.Open.Complaints + 
                Number.of.Policies + HighSchool + Policy.Corporate + Policy.Personal + 
                Offer1 + Offer3 + Vehicle.2door + Vehicle.4door + Vehicle.SUV + 
                Vehicle.Lux_SUV + Vehicle.Sport_Car + Vehicle.Size.Small, training)
@@ -269,7 +269,12 @@ summary(lm.clv.2)
 #lets check the deviance table 
 anova(lm.clv, test="Chisq")
 
-#not good results, seems to be the data is not good. 
+#model fit measures
+library(descr)
+LogRegR2(lm.clv.2)
+# >0.2 ok, >0.4 good, >0.5 really good 
+
+#not good results, seems to be the data is not good. ('garbage in, garbage out')
 #our data can only predict 16.8% of the variation of the target Variable CLV
 
 #########################
@@ -293,6 +298,7 @@ error.rate <- abs((testing.prediction$false.prediction)/(testing.prediction$targ
 mean(error.rate)
 
 
+
 ###################
 #conclusion:
 ###################
@@ -301,9 +307,5 @@ mean(error.rate)
 #the independent variable (CLV) can be explained through them. The most important features 
 #include Monthly.Premium.Auto, Number.of.Open.Complaints and Renew.Offer. So if you want 
 #to improve the Customer Lifetime Value you should pay attention to them.
-
-
-
-
 
 
